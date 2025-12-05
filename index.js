@@ -33,7 +33,7 @@ async function run() {
       
       const listingDB = client.db('listingDB');
       const listingCollection = listingDB.collection('listing');
-
+    const ordersCollection = listingDB.collection('orders')
       
       
       
@@ -44,12 +44,21 @@ async function run() {
           res.send(result)
       });
       
-      //   get all data
+      //   get signle data by id
       app.get('/listing', async (req, res) => {
           const cursor = listingCollection.find()
           const result = await cursor.toArray();
           res.send(result)
       });
+
+      // post order 
+      app.post('/orders', async (req, res) => {
+          const data = req.body;
+          console.log(req.body);
+          const result = await ordersCollection.insertOne(data);
+          res.send(result)
+        
+      })
 
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
