@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors')
 require('dotenv').config({ path: '.env.local' });
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -47,15 +47,16 @@ async function run() {
             res.send(result)
         });
 
-        // // get elemnt by id
-        // app.get('/listing/:id', async (req, res) => {
-        //     const id = req.params
-        //     console.log(id);
+        // get elemnt by id
+        app.get('/listing/:id', async (req, res) => {
+            const id = req.params
+            console.log(id);
 
-        //     const query = { _id: new Object(id) }
-        //     const result = await listingCollection.findOne(query)
+            const query = { _id: new ObjectId(id) }
+            const result = await listingCollection.findOne(query)
+            res.send(result)
             
-        // })
+        })
 
         //   get all data 
         app.get('/listing', async (req, res) => {
@@ -91,6 +92,20 @@ async function run() {
             res.send(result)
         })
 
+
+        // put Update My Listing
+        app.put('/update/:id', async (req, res) => {
+            const data = req.body
+            const id = req.params
+            const query = {_id: new ObjectId(id)}
+            
+            const updatedInfo = {
+                $set: data
+            }
+            
+            const result = await listingCollection.updateOne(query, updatedInfo)
+            res.send(result)
+        })
 
 
         await client.db("admin").command({ ping: 1 });
