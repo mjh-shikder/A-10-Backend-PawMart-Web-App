@@ -42,10 +42,20 @@ async function run() {
 
         // get api recent 6 
         app.get('/recent-listing', async (req, res) => {
-            const cursor = listingCollection.find().limit(6)
+            const cursor = listingCollection.find().sort({ createdAt: -1 }).limit(6)
             const result = await cursor.toArray();
             res.send(result)
         });
+
+        // // get elemnt by id
+        // app.get('/listing/:id', async (req, res) => {
+        //     const id = req.params
+        //     console.log(id);
+
+        //     const query = { _id: new Object(id) }
+        //     const result = await listingCollection.findOne(query)
+            
+        // })
 
         //   get all data 
         app.get('/listing', async (req, res) => {
@@ -53,6 +63,15 @@ async function run() {
             const result = await cursor.toArray();
             res.send(result)
         });
+
+
+        // my listing only listing by logged in user
+        app.get('/my-listing', async (req, res) => {
+            const { email } = req.query
+            const query = { email: email }
+            const result = await listingCollection.find(query).toArray()
+            res.send(result)
+        } )
 
         // post order 
         app.post('/orders', async (req, res) => {
@@ -62,11 +81,13 @@ async function run() {
             res.send(result)
         })
 
-        // post Add Listing
+        // post Add Listing to 'listing' collection
         app.post('/add-listing', async (req, res) => {
             const data = req.body;
+            const date = new Date();
+            data.createdAt = date;
             console.log(data);
-            const result = await addListingCollection.insertOne(data);
+            const result = await listingCollection.insertOne(data);
             res.send(result)
         })
 
