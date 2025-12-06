@@ -15,56 +15,68 @@ app.use(express.json())
 
 
 
-const uri = process.env.MONGO_URI 
+const uri = process.env.MONGO_URI
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
-  serverApi: {
-    version: ServerApiVersion.v1,
-    strict: true,
-    deprecationErrors: true,
-  }
+    serverApi: {
+        version: ServerApiVersion.v1,
+        strict: true,
+        deprecationErrors: true,
+    }
 });
 
 async function run() {
-  try {
-      await client.connect();
-      console.log('successfully connected to mongo');
-      
-      const listingDB = client.db('listingDB');
-      const listingCollection = listingDB.collection('listing');
-    const ordersCollection = listingDB.collection('orders')
-      
-      
-      
-    // get api recent 6 
-      app.get('/recent-listing', async (req, res) => {
-          const cursor = listingCollection.find().limit(6)
-          const result = await cursor.toArray();
-          res.send(result)
-      });
-      
-      //   get signle data by id
-      app.get('/listing', async (req, res) => {
-          const cursor = listingCollection.find()
-          const result = await cursor.toArray();
-          res.send(result)
-      });
+    try {
+        await client.connect();
+        console.log('successfully connected to mongo');
 
-      // post order 
-      app.post('/orders', async (req, res) => {
-          const data = req.body;
-          console.log(req.body);
-          const result = await ordersCollection.insertOne(data);
-          res.send(result)
-        
-      })
+        const listingDB = client.db('listingDB');
+        const listingCollection = listingDB.collection('listing');
+        const ordersCollection = listingDB.collection('orders')
+        const addListingCollection = listingDB.collection('addListing')
 
-    await client.db("admin").command({ ping: 1 });
-    console.log("Pinged your deployment. You successfully connected to MongoDB!");
-  } finally {
-    // await client.close();
-  }
+
+
+
+
+        // get api recent 6 
+        app.get('/recent-listing', async (req, res) => {
+            const cursor = listingCollection.find().limit(6)
+            const result = await cursor.toArray();
+            res.send(result)
+        });
+
+        //   get all data 
+        app.get('/listing', async (req, res) => {
+            const cursor = listingCollection.find()
+            const result = await cursor.toArray();
+            res.send(result)
+        });
+
+        // post order 
+        app.post('/orders', async (req, res) => {
+            const data = req.body;
+            console.log(req.body);
+            const result = await ordersCollection.insertOne(data);
+            res.send(result)
+        })
+
+        // post Add Listing
+        app.post('/add-listing', async (req, res) => {
+            const data = req.body;
+            console.log(data);
+            const result = await addListingCollection.insertOne(data);
+            res.send(result)
+        })
+
+
+
+        await client.db("admin").command({ ping: 1 });
+        console.log("Pinged your deployment. You successfully connected to MongoDB!");
+    } finally {
+        // await client.close();
+    }
 }
 run().catch(console.dir);
 
@@ -77,5 +89,5 @@ app.get('/', (req, res) => {
 
 app.listen(port, () => {
     console.log(`users server started on port: ${port}`);
-    
+
 })
