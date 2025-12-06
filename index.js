@@ -55,13 +55,35 @@ async function run() {
             const query = { _id: new ObjectId(id) }
             const result = await listingCollection.findOne(query)
             res.send(result)
-            
+
         })
 
-        //   get all data 
-        app.get('/listing', async (req, res) => {
-            const cursor = listingCollection.find()
+        // get all order data
+        app.get('/my-orders', async (req, res) => {
+            const { email } = req.query
+            const query = {email: email}
+            const cursor = ordersCollection.find(query)
             const result = await cursor.toArray();
+            res.send(result)
+        })
+
+  
+
+        //   get all listing data 
+        app.get('/listing', async (req, res) => {
+            const { category, email } = req.query
+            console.log(category, email);
+
+            const query = {}
+            if (category) {
+                query.category = category
+            }
+            if (email) {
+                query.email = email;
+            }
+
+            // const cursor = listingCollection.find(query)
+            const result = await listingCollection.find(query).sort({createdAt: -1}).toArray();
             res.send(result)
         });
 
@@ -72,7 +94,7 @@ async function run() {
             const query = { email: email }
             const result = await listingCollection.find(query).toArray()
             res.send(result)
-        } )
+        })
 
         // post order 
         app.post('/orders', async (req, res) => {
@@ -97,13 +119,17 @@ async function run() {
         app.put('/update/:id', async (req, res) => {
             const data = req.body
             const id = req.params
-            const query = {_id: new ObjectId(id)}
-            
-            const updatedInfo = {
-                $set: data
-            }
-            
+            const query = { _id: new ObjectId(id) }
+            const updatedInfo = { $set: data }
             const result = await listingCollection.updateOne(query, updatedInfo)
+            res.send(result)
+        })
+
+        // Dlete Listing
+        app.delete('/delete/:id', async (req, res) => {
+            const id = req.params
+            const query = { _id: new ObjectId(id) }
+            const result = await listingCollection.deleteOne(query)
             res.send(result)
         })
 
